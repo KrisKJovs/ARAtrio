@@ -665,6 +665,11 @@
         async function handleFormSubmission(e) {
             e.preventDefault();
             
+            // Show loading state on button
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
             const form = document.getElementById('assessmentForm');
             const formData = new FormData(form);
             const data = {};
@@ -695,26 +700,32 @@
             };
 
             try {
-                const response = await fetch('save_assessment.php', {
+                // Store form data in sessionStorage
+                sessionStorage.setItem('formData', JSON.stringify(data));
+                
+                // Save to database
+                const saveResponse = await fetch('save_assessment.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
                 });
-
-                const result = await response.json();
                 
-                if (result.success) {
-                    // Generate HTML report after successful save
-                    generateReport(formData);
-                    alert('Assessment saved successfully!');
+                const saveResult = await saveResponse.json();
+                if (saveResult.success) {
+                    // Changed redirect to parent-submitted.html
+                    window.location.href = 'parent-submitted.html';
                 } else {
-                    alert('Error saving assessment: ' + result.error);
+                    throw new Error(saveResult.error || 'Failed to save assessment');
                 }
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error saving assessment. Please try again.');
+                alert('Error submitting assessment. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Assessment';
             }
         }
 
@@ -881,7 +892,7 @@
                 <div class="progress" id="formProgress"></div>
             </div>
             
-            <form id="assessmentForm" action="javascript:void(0);" method="POST">
+            <form id="assessmentForm" onsubmit="handleFormSubmission(event)">
                 <!-- Section A -->
                 <div class="form-section">
                     <h3><i class="fas fa-user"></i> Section A: Background Information</h3>
@@ -1311,7 +1322,9 @@
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Submit</button>
+                <button type="submit" class="submit-btn">
+                    Submit Assessment
+                </button>
             </form>
         </div>
     </div>
