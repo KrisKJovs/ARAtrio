@@ -1,14 +1,17 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "child_assessment_db";
+// Database configuration
+$host = "localhost"; // Change if using a remote database
+$dbname = "ara_database"; // Replace with your database name
+$username = "ara0"; // Replace with your database username
+$password = "araara0"; // Replace with your database password
 
+// Create a connection
 try {
-    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => "Connection failed: " . $e->getMessage()]);
-    exit;
+    // Uncomment for testing
+    // echo "Database connected successfully!";
+} catch (PDOException $e) {
+    die("Connection failed: " . $e->getMessage());
 }
-?> 
+?>
